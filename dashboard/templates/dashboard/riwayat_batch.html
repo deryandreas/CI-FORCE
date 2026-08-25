@@ -1,0 +1,164 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<!-- TOP FIXED-LIKE NAVBAR -->
+<div class="sticky top-0 z-20 w-full bg-white border-b border-gray-200 px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-2">
+        <h2 class="text-lg font-semibold text-gray-900">Gudang Wonosobo</h2>
+    </div>
+    
+    <!-- Parameter Status Card -->
+    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 flex items-center justify-end gap-6 text-sm">
+        <div>
+            <span class="text-gray-500 text-xs block">Suhu</span>
+            <span class="text-gray-900 font-bold text-base">28°C</span>
+        </div>
+        <div class="border-l border-amber-500/20 h-8"></div>
+        <div>
+            <span class="text-gray-500 text-xs block">Kelembapan</span>
+            <span class="text-gray-900 font-bold text-base">82% RH</span>
+        </div>
+        <div class="border-l border-amber-500/20 h-8"></div>
+        <div>
+            <span class="text-gray-500 text-xs block">Status</span>
+            <span class="text-amber-600 font-bold block">Risiko Korosi Tinggi</span>
+        </div>
+    </div>
+</div>
+
+<!-- CONTAINER UTAMA HALAMAN RIWAYAT BATCH -->
+<div class="p-8 flex flex-col gap-6 max-w-[1400px] mx-auto w-full">
+    
+    <!-- HEADER HALAMAN & EXPORT DATA -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Riwayat Batch</h1>
+            <p class="text-gray-500 text-sm mt-1">Kelola dan pantau semua batch inventaris baja</p>
+        </div>
+        
+        <!-- Tombol Export Data -->
+        <button class="bg-[#2D5A27] hover:bg-[#20491b] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 self-start sm:self-center shadow-sm">
+            <span>Export Data</span>
+        </button>
+    </div>
+
+    <!-- ROW 1: MINI STATS CARDS GRID -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col">
+            <span class="text-gray-500 text-sm font-medium">Total Batch</span>
+            <span class="text-gray-900 text-3xl font-bold mt-2">{{ quick_stats.total }}</span>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-white p-6 rounded-xl border-2 border-[#2D5A27] shadow-sm flex flex-col">
+            <span class="text-gray-500 text-sm font-medium">Terlindungi</span>
+            <span class="text-[#2D5A27] text-3xl font-bold mt-2">{{ quick_stats.terlindungi }}</span>
+        </div>
+        <!-- Card 3 -->
+        <div class="bg-white p-6 rounded-xl border-2 border-[#F5A623] shadow-sm flex flex-col">
+            <span class="text-gray-500 text-sm font-medium">Butuh Pelapisan</span>
+            <span class="text-[#F5A623] text-3xl font-bold mt-2">{{ quick_stats.butuh_pelapisan }}</span>
+        </div>
+        <!-- Card 4 -->
+        <div class="bg-white p-6 rounded-xl border-2 border-[#FB2C36] shadow-sm flex flex-col">
+            <span class="text-gray-500 text-sm font-medium">Kadaluarsa</span>
+            <span class="text-[#FB2C36] text-3xl font-bold mt-2">{{ quick_stats.kadaluarsa }}</span>
+        </div>
+    </div>
+
+    <!-- ROW 2: FILTERS & SEARCH BAR -->
+    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+        <!-- Search Input -->
+        <div class="w-full md:flex-1 relative">
+            <input type="text" placeholder="Cari berdasarkan ID Batch atau Material..." class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-transparent rounded-lg outline-none focus:bg-white focus:border-gray-300 transition-all text-sm text-gray-900 placeholder-gray-400">
+            <div class="absolute left-3 top-2.5 text-gray-400">
+                <!-- Icon Search Placeholder -->
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </div>
+
+        <!-- Filter Dropdown Status -->
+        <div class="w-full md:w-64 relative">
+            <select class="w-full px-3 py-2 bg-gray-100 border border-transparent rounded-lg outline-none focus:bg-white focus:border-gray-300 transition-all text-sm font-medium text-gray-900 appearance-none cursor-pointer">
+                <option>Semua Status</option>
+                <option>Terlindungi</option>
+                <option>Butuh Pelapisan</option>
+                <option>Kadaluarsa</option>
+            </select>
+            <div class="absolute right-3 top-3 pointer-events-none text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3: RESPONSIVE DATA TABLE CARD -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+        <!-- Table Header Panel -->
+        <div class="bg-blue-500/5 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-gray-900 font-semibold text-base">Daftar Batch ({{ quick_stats.total }})</h3>
+        </div>
+        
+        <!-- Table Element Container wrapper -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[1000px]">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200 text-gray-900 font-semibold text-sm">
+                        <th class="px-6 py-4">ID Batch</th>
+                        <th class="px-6 py-4">Material</th>
+                        <th class="px-6 py-4">Dimensi</th>
+                        <th class="px-6 py-4">Qty</th>
+                        <th class="px-6 py-4">Dosis</th>
+                        <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Sisa Hari</th>
+                        <th class="px-6 py-4">Lokasi</th>
+                        <th class="px-6 py-4 text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    {% for batch in batch_list %}
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <!-- ID Batch Code -->
+                        <td class="px-6 py-4 font-mono font-bold text-gray-900">{{ batch.id }}</td>
+                        <!-- Nama Material -->
+                        <td class="px-6 py-4 text-gray-900">{{ batch.material }}</td>
+                        <!-- Dimensi Ukuran -->
+                        <td class="px-6 py-4 text-gray-500">{{ batch.dimensi }}</td>
+                        <!-- Kuantitas Jumlah -->
+                        <td class="px-6 py-4 font-bold text-gray-900">{{ batch.qty }} Pcs</td>
+                        <!-- Dosis Larutan -->
+                        <td class="px-6 py-4 font-mono text-xs text-gray-800">
+                            <span class="px-2 py-1 border border-gray-200 rounded-md bg-white shadow-sm">{{ batch.dosis }}</span>
+                        </td>
+                        <!-- Status Badge -->
+                        <td class="px-6 py-4">
+                            {% if batch.status == 'Terlindungi' %}
+                                <span class="px-2.5 py-1 bg-[#2D5A27] text-white text-xs font-semibold rounded-md">Terlindungi</span>
+                            {% elif batch.status == 'Butuh Pelapisan' %}
+                                <span class="px-2.5 py-1 bg-[#F5A623] text-white text-xs font-semibold rounded-md">Butuh Pelapisan</span>
+                            {% else %}
+                                <span class="px-2.5 py-1 bg-[#E7000B] text-white text-xs font-semibold rounded-md">Kadaluarsa</span>
+                            {% endif %}
+                        </td>
+                        <!-- Sisa Hari Masa Aman -->
+                        <td class="px-6 py-4 font-bold {% if batch.status == 'Terlindungi' %}text-[#2D5A27]{% elif batch.status == 'Butuh Pelapisan' %}text-[#F5A623]{% else %}text-[#E7000B]{% endif %}">
+                            {{ batch.sisa_hari }}
+                        </td>
+                        <!-- Lokasi Rak Gudang -->
+                        <td class="px-6 py-4 text-gray-500">{{ batch.lokasi }}</td>
+                        <!-- Tombol Aksi Opsional -->
+                        <td class="px-6 py-4 text-center">
+                            <div class="inline-flex gap-2">
+                                <button class="p-1.5 border border-gray-200 rounded-md hover:bg-gray-100 transition-colors text-gray-700" title="Detail">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

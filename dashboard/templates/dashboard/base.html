@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI-FORCE - {{ page_title }}</title>
+    
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        /* Kustomisasi scrollbar halus untuk navigasi sidebar jika menunya penuh */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3D7A35;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased min-h-screen m-0 p-0 flex flex-col">
+
+    <!-- Container Utama Layout Dashboard -->
+    <div class="flex min-h-screen w-full relative items-stretch">
+        
+        <!-- ==================== SIDEBAR COMPONENT (KIRI) ==================== -->
+        <aside class="w-64 bg-[#2D5A27] text-white flex flex-col flex-shrink-0 border-r border-[#3D7A35] min-h-screen sticky top-0 z-30">
+            
+            <!-- Logo Brand Header Dashboard -->
+            <div class="h-24 px-6 flex flex-col justify-center border-b border-[#3D7A35] flex-shrink-0">
+                <h1 class="text-xl font-bold tracking-wide">CI-FORCE</h1>
+                <p class="text-xs text-[#B9F8CF] mt-0.5 tracking-wider font-medium">Inventory Guard</p>
+            </div>
+            
+            <!-- Menu Navigasi Links (Dinamis Otomatis Mendeteksi Route Active) -->
+            <nav class="flex-1 p-4 flex flex-col gap-1.5 overflow-y-auto custom-scrollbar">
+                
+                <!-- Menu 1: Ringkasan -->
+                <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'home' %}bg-[#3D7A35] text-white shadow-sm{% else %}text-[#B9F8CF] hover:bg-[#3D7A35]/40 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V16zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V16z"/>
+                    </svg>
+                    <span>Ringkasan</span>
+                </a>
+                
+                <!-- Menu 2: Kalkulator Prediktif -->
+                <a href="{% url 'kalkulator' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'kalkulator' %}bg-[#3D7A35] text-white shadow-sm{% else %}text-[#B9F8CF] hover:bg-[#3D7A35]/40 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <span>Kalkulator Prediktif</span>
+                </a>
+                
+                <!-- Menu 3: Riwayat Batch -->
+                <a href="{% url 'riwayat_batch' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'riwayat_batch' %}bg-[#3D7A35] text-white shadow-sm{% else %}text-[#B9F8CF] hover:bg-[#3D7A35]/40 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Riwayat Batch</span>
+                </a>
+                
+                <!-- Menu 4: Laporan ESG (Ganti '#' dengan URL jika nanti sudah dibuat) -->
+                <!-- Cari menu Laporan ESG di base.html dan ubah menjadi: -->
+                <a href="{% url 'laporan_esg' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'laporan_esg' %}bg-[#3D7A35] text-white shadow-sm{% else %}text-[#B9F8CF] hover:bg-[#3D7A35]/40 hover:text-white{% endif %}">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    <span>Laporan ESG</span>
+                </a>
+                
+                <!-- Menu 5: Pengaturan (Ganti '#' dengan URL jika nanti sudah dibuat) -->
+                <a href="{% url 'pengaturan' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 {% if request.resolver_match.url_name == 'pengaturan' %}bg-[#3D7A35] text-white shadow-sm{% else %}text-[#B9F8CF] hover:bg-[#3D7A35]/40 hover:text-white{% endif %}">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span>Pengaturan</span>
+            </a>
+                
+            </nav>
+            
+            <!-- Footer Sidebar Copyright Tag -->
+            <div class="p-4 border-t border-[#3D7A35] bg-[#24481f] flex-shrink-0">
+                <p class="text-[10px] text-[#B9F8CF] text-center tracking-wide">© 2026 CI-FORCE Indonesia</p>
+            </div>
+        </aside>
+
+        <!-- ==================== MAIN AREA CONTENT CONTAINER (KANAN) ==================== -->
+        <div class="flex-1 flex flex-col min-w-0 bg-[#F8F9FA]">
+            
+            <!-- SUB MAIN CONTENT INJECTOR -->
+            <div class="flex-1 w-full pb-12">
+                {% block content %}
+                <!-- Semua isi file anak (ringkasan, kalkulator, riwayat_batch) akan di-render otomatis di area ruang ini -->
+                {% endblock %}
+            </div>
+            
+        </div>
+        
+    </div>
+
+</body>
+</html>

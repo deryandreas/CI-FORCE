@@ -1,0 +1,302 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<!-- TOP FIXED-LIKE NAVBAR -->
+<div class="sticky top-0 z-20 w-full bg-white border-b border-gray-200 px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-2">
+        <h2 class="text-lg font-semibold text-gray-900">{{ current_warehouse.nama_gudang|default:"Gudang Wonosobo" }}</h2>
+    </div>
+    
+    <!-- Parameter Status Card -->
+    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 flex items-center justify-end gap-6 text-sm">
+        <div>
+            <span class="text-gray-500 text-xs block">Suhu</span>
+            <span class="text-gray-900 font-bold text-base">{{ warehouse_status.suhu|default:28 }}°C</span>
+        </div>
+        <div class="border-l border-amber-500/20 h-8"></div>
+        <div>
+            <span class="text-gray-500 text-xs block">Kelembapan</span>
+            <span class="text-gray-900 font-bold text-base">{{ warehouse_status.kelembapan|default:82 }}% RH</span>
+        </div>
+        <div class="border-l border-amber-500/20 h-8"></div>
+        <div>
+            <span class="text-gray-500 text-xs block">Status</span>
+            <span class="text-amber-600 font-bold block">{{ warehouse_status.resiko|default:"Kondisi Aman / Stabil" }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- CONTAINER UTAMA PENGATURAN -->
+<div class="p-8 flex flex-col gap-6 max-w-[1400px] mx-auto w-full">
+    
+    <!-- HEADER HALAMAN -->
+    <div class="flex flex-col gap-1">
+        <h1 class="text-2xl font-bold text-gray-900">Pengaturan</h1>
+        <p class="text-gray-500 text-sm">Kelola preferensi sistem dan konfigurasi aplikasi</p>
+    </div>
+
+    <!-- SUB-TAB NAVIGATION LINKS -->
+    <div class="w-full bg-gray-100 p-1 rounded-xl flex flex-wrap gap-2">
+        <a href="?tab=profil" class="flex-1 min-w-[120px] text-center py-2 rounded-lg text-sm font-medium transition-all {% if active_tab == 'profil' %}bg-white text-[#2D5A27] shadow-sm font-semibold{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+            👤 Profil
+        </a>
+        <a href="?tab=lokasi" class="flex-1 min-w-[120px] text-center py-2 rounded-lg text-sm font-medium transition-all {% if active_tab == 'lokasi' %}bg-white text-[#2D5A27] shadow-sm font-semibold{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+            📍 Lokasi
+        </a>
+        <a href="?tab=notifikasi" class="flex-1 min-w-[120px] text-center py-2 rounded-lg text-sm font-medium transition-all {% if active_tab == 'notifikasi' %}bg-white text-[#2D5A27] shadow-sm font-semibold{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+            🔔 Notifikasi
+        </a>
+        <a href="?tab=api" class="flex-1 min-w-[120px] text-center py-2 rounded-lg text-sm font-medium transition-all {% if active_tab == 'api' %}bg-white text-[#2D5A27] shadow-sm font-semibold{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+            🔌 API & Integrasi
+        </a>
+        <a href="?tab=keamanan" class="flex-1 min-w-[120px] text-center py-2 rounded-lg text-sm font-medium transition-all {% if active_tab == 'keamanan' %}bg-white text-[#2D5A27] shadow-sm font-semibold{% else %}text-gray-500 hover:text-gray-900{% endif %}">
+            🛡️ Keamanan
+        </a>
+    </div>
+
+    <!-- DYNAMIC FORM SECTIONS BASED ON ACTIVE TAB -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+        
+        <!-- ======= CONTENT TAB: PROFIL ======= -->
+        {% if active_tab == 'profil' %}
+        <div class="bg-blue-500/5 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-gray-900 font-semibold text-base">Informasi Pengguna</h3>
+            <span class="text-xs text-gray-400">Data Akun</span>
+        </div>
+        <form method="POST" action="{% url 'pengaturan' %}?tab=profil" class="p-6 flex flex-col gap-6">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_profile">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Nama Lengkap</label>
+                    <input type="text" name="nama" value="Budi Santoso" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Jabatan</label>
+                    <input type="text" name="jabatan" value="Warehouse Manager" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Email</label>
+                    <input type="email" name="email" value="budi.santoso@ciforce.id" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Nomor Telepon</label>
+                    <input type="text" name="telepon" value="+62 812-3456-7890" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-900 font-medium text-sm">Nama Perusahaan</label>
+                <input type="text" name="perusahaan" value="PT. Industri Baja Nusantara" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">
+            </div>
+            <button type="submit" class="bg-[#2D5A27] hover:bg-[#20441a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold self-start shadow transition-colors">
+                Simpan Perubahan
+            </button>
+        </form>
+
+        <!-- ======= CONTENT TAB: LOKASI (EDITABLE & CONNECTED TO DB) ======= -->
+        {% elif active_tab == 'lokasi' %}
+        <div class="bg-[#2D5A27]/5 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-gray-900 font-semibold text-base">Pengaturan Lokasi Gudang</h3>
+            <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold">Tersinkronisasi Database</span>
+        </div>
+        <form method="POST" action="{% url 'pengaturan' %}?tab=lokasi" class="p-6 flex flex-col gap-6">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_location">
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-900 font-medium text-sm">Nama Gudang <span class="text-red-500">*</span></label>
+                <input type="text" 
+                       name="nama_gudang" 
+                       value="{{ current_warehouse.nama_gudang }}" 
+                       required 
+                       placeholder="Contoh: Gudang Wonosobo / Gudang Makassar" 
+                       class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20 font-semibold">
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-900 font-medium text-sm">Alamat Lengkap <span class="text-red-500">*</span></label>
+                <textarea name="alamat" 
+                          rows="2" 
+                          required 
+                          placeholder="Masukkan alamat lengkap fasilitas gudang..." 
+                          class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">{{ current_warehouse.alamat }}</textarea>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Latitude</label>
+                    <input type="number" 
+                           step="any" 
+                           name="latitude" 
+                           value="{{ current_warehouse.latitude }}" 
+                           placeholder="-7.3614" 
+                           class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Longitude</label>
+                    <input type="number" 
+                           step="any" 
+                           name="longitude" 
+                           value="{{ current_warehouse.longitude }}" 
+                           placeholder="109.9004" 
+                           class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-900 font-medium text-sm">Stasiun BMKG / Weather Station</label>
+                <input type="text" 
+                       name="stasiun_bmkg" 
+                       value="{{ current_warehouse.stasiun_bmkg }}" 
+                       placeholder="Contoh: BMKG Stasiun Wonosobo" 
+                       class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white focus:ring-2 focus:ring-[#2D5A27]/20">
+            </div>
+            
+            <div class="w-full bg-blue-50 border border-blue-100 rounded-xl p-4 text-slate-700 text-xs flex items-center gap-2">
+                <span>📍</span>
+                <span><strong>Info:</strong> Data nama gudang ini akan digunakan secara otomatis pada navbar atas dan saat registrasi batch baru di Kalkulator.</span>
+            </div>
+            
+            <button type="submit" class="bg-[#2D5A27] hover:bg-[#20441a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold self-start shadow transition-colors">
+                Simpan Lokasi
+            </button>
+        </form>
+
+        <!-- ======= CONTENT TAB: NOTIFIKASI ======= -->
+        {% elif active_tab == 'notifikasi' %}
+        <div class="bg-amber-500/5 px-6 py-4 border-b border-gray-100">
+            <h3 class="text-gray-900 font-semibold text-base">Preferensi Notifikasi</h3>
+        </div>
+        <form method="POST" action="{% url 'pengaturan' %}?tab=notifikasi" class="p-6 flex flex-col gap-6">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_notifications">
+            
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                <div>
+                    <h4 class="text-gray-900 font-semibold text-base">Email Notifications</h4>
+                    <p class="text-gray-500 text-sm mt-0.5">Terima notifikasi melalui email resmi perusahaan</p>
+                </div>
+                <input type="checkbox" name="notif_email" checked class="w-10 h-5 bg-gray-300 rounded-full appearance-none checked:bg-[#2D5A27] relative cursor-pointer outline-none transition-colors before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-5 before:transition-transform">
+            </div>
+            
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                <div>
+                    <h4 class="text-gray-900 font-semibold text-base">Push Notifications</h4>
+                    <p class="text-gray-500 text-sm mt-0.5">Notifikasi langsung ke dashboard web aplikasi</p>
+                </div>
+                <input type="checkbox" name="notif_push" checked class="w-10 h-5 bg-gray-300 rounded-full appearance-none checked:bg-[#2D5A27] relative cursor-pointer outline-none transition-colors before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-5 before:transition-transform">
+            </div>
+            
+            <div class="flex items-center justify-between border-b border-gray-100 pb-4">
+                <div>
+                    <h4 class="text-gray-900 font-semibold text-base">Peringatan Kadaluarsa Batch</h4>
+                    <p class="text-gray-500 text-sm mt-0.5">Alert otomatis beberapa hari sebelum masa perlindungan habis</p>
+                </div>
+                <input type="checkbox" name="notif_expired" checked class="w-10 h-5 bg-gray-300 rounded-full appearance-none checked:bg-[#2D5A27] relative cursor-pointer outline-none transition-colors before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-5 before:transition-transform">
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-900 font-medium text-sm">Hari Sebelum Kadaluarsa untuk Alert</label>
+                <select name="alert_days" class="w-full md:w-64 px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white cursor-pointer font-medium">
+                    <option value="3">3 Hari</option>
+                    <option value="5">5 Hari</option>
+                    <option value="7">7 Hari</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold self-start shadow transition-colors">
+                Simpan Preferensi
+            </button>
+        </form>
+
+        <!-- ======= CONTENT TAB: API INTEGRASI ======= -->
+        {% elif active_tab == 'api' %}
+        <div class="bg-blue-500/5 px-6 py-4 border-b border-gray-100">
+            <h3 class="text-gray-900 font-semibold text-base">Integrasi API</h3>
+        </div>
+        <form method="POST" action="{% url 'pengaturan' %}?tab=api" class="p-6 flex flex-col gap-6">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_api">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-gray-100 pb-4 gap-2">
+                <div>
+                    <h4 class="text-gray-900 font-semibold text-base">API BMKG & IQAir</h4>
+                    <p class="text-gray-500 text-sm mt-0.5">Integrasi data cuaca dengan stasiun meteorologi terdekat</p>
+                </div>
+                <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200 self-start sm:self-center">✓ Connected</span>
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-900 font-medium text-sm">API Key IQAir / BMKG</label>
+                <input type="password" name="api_key" value="c7221a94-83e0-42f3-920b-0b5e71c0603e" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white font-mono text-sm">
+            </div>
+            
+            <div class="flex items-center justify-between border-t border-b border-gray-100 py-4 mt-2">
+                <div>
+                    <h4 class="text-gray-900 font-semibold text-base">Auto-Sync Data Cuaca</h4>
+                    <p class="text-gray-500 text-sm mt-0.5">Sinkronisasi otomatis setiap interval yang ditentukan</p>
+                </div>
+                <input type="checkbox" name="auto_sync" checked class="w-10 h-5 bg-gray-300 rounded-full appearance-none checked:bg-[#2D5A27] relative cursor-pointer outline-none transition-colors before:content-[''] before:absolute before:w-4 before:h-4 before:bg-white before:rounded-full before:top-0.5 before:left-0.5 checked:before:translate-x-5 before:transition-transform">
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-900 font-medium text-sm">Interval Sinkronisasi</label>
+                <select name="sync_interval" class="w-full md:w-64 px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-[#2D5A27] focus:bg-white cursor-pointer font-medium">
+                    <option value="30">30 Menit</option>
+                    <option value="60">60 Menit</option>
+                    <option value="120">120 Menit</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold self-start shadow transition-colors">
+                Simpan Konfigurasi API
+            </button>
+        </form>
+
+        <!-- ======= CONTENT TAB: KEAMANAN ======= -->
+        {% elif active_tab == 'keamanan' %}
+        <div class="bg-red-500/5 px-6 py-4 border-b border-red-100">
+            <h3 class="text-red-700 font-semibold text-base">Keamanan & Privasi</h3>
+        </div>
+        <form method="POST" action="{% url 'pengaturan' %}?tab=keamanan" class="p-6 flex flex-col gap-6">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_security">
+            
+            <h4 class="text-gray-900 font-semibold text-base border-b border-gray-50 pb-2">Ubah Password</h4>
+            <div class="flex flex-col gap-5">
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Password Lama</label>
+                    <input type="password" name="old_password" placeholder="Masukkan password saat ini" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Password Baru</label>
+                    <input type="password" name="new_password" placeholder="Masukkan password baru" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-900 font-medium text-sm">Konfirmasi Password Baru</label>
+                    <input type="password" name="confirm_password" placeholder="Ulangi password baru" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg outline-none border border-transparent focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-500/20">
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-100 pt-6 flex flex-col gap-4">
+                <h4 class="text-gray-900 font-semibold text-base">Backup Data</h4>
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <span class="text-gray-900 font-bold text-sm block">Backup Terakhir</span>
+                        <span class="text-gray-500 text-xs mt-0.5 block">25 Agustus 2026, 16:00 WIB</span>
+                    </div>
+                    <button type="button" class="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-900 rounded-lg text-sm font-semibold shadow-sm transition-colors">
+                        📦 Backup Sekarang
+                    </button>
+                </div>
+            </div>
+            
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold self-start shadow transition-colors">
+                Update Password
+            </button>
+        </form>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

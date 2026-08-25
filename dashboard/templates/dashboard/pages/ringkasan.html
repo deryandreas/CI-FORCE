@@ -1,0 +1,247 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<!-- SCRIPT CHART.JS VIA CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- TOP FIXED NAVBAR -->
+<div class="sticky top-0 z-20 w-full bg-white border-b border-gray-200 px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-2">
+        <h2 class="text-lg font-semibold text-gray-900">{{ current_warehouse.nama_gudang|default:"Gudang Depok" }}</h2>
+    </div>
+    
+    <!-- Parameter Status Card -->
+    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 flex items-center justify-end gap-6 text-sm">
+        <div>
+            <span class="text-gray-500 text-xs block">Suhu</span>
+            <span class="text-gray-900 font-bold text-base">{{ warehouse_status.suhu|default:28 }}°C</span>
+        </div>
+        <div class="border-l border-amber-500/20 h-8"></div>
+        <div>
+            <span class="text-gray-500 text-xs block">Kelembapan</span>
+            <span class="text-gray-900 font-bold text-base">{{ warehouse_status.kelembapan|default:82 }}% RH</span>
+        </div>
+        <div class="border-l border-amber-500/20 h-8"></div>
+        <div>
+            <span class="text-gray-500 text-xs block">Status</span>
+            <span class="text-amber-600 font-bold block">{{ warehouse_status.resiko|default:"Risiko Korosi Terpantau" }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- CONTAINER ISI UTAMA DASHBOARD -->
+<div class="p-8 flex flex-col gap-6 max-w-[1400px] mx-auto w-full">
+    
+    <!-- ROW 1: STATS CARDS GRID -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+            <span class="text-gray-500 text-sm font-medium">Total Batch Aktif</span>
+            <span class="text-gray-900 text-3xl font-bold mt-2">{{ stats.total_batch }}</span>
+            <span class="text-emerald-600 text-xs font-medium mt-2 flex items-center gap-1">↑ 12% dari bulan lalu</span>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+            <span class="text-gray-500 text-sm font-medium">Terlindungi</span>
+            <span class="text-[#2D5A27] text-3xl font-bold mt-2">{{ stats.terlindungi }}</span>
+            <span class="text-gray-400 text-xs font-medium mt-2">{{ stats.persen_terlindungi|default:"92% dari total" }}</span>
+        </div>
+        <!-- Card 3 -->
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+            <span class="text-gray-500 text-sm font-medium">Butuh Pelapisan</span>
+            <span class="text-amber-500 text-3xl font-bold mt-2">{{ stats.butuh_pelapisan }}</span>
+            <span class="text-gray-400 text-xs font-medium mt-2">{{ stats.persen_butuh|default:"6% dari total" }}</span>
+        </div>
+        <!-- Card 4 -->
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+            <span class="text-gray-500 text-sm font-medium">Efisiensi Inhibisi</span>
+            <span class="text-gray-900 text-3xl font-bold mt-2">{{ stats.efisiensi }}</span>
+            <span class="text-emerald-600 text-xs font-medium mt-2">Optimal</span>
+        </div>
+    </div>
+
+    <!-- ROW 2: SUB-MENU AKSES CEPAT (FUNGSIONAL LINK) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <a href="{% url 'kalkulator' %}" class="bg-white p-6 rounded-xl border-2 border-blue-500 shadow-sm hover:shadow-md transition-all block cursor-pointer">
+            <h4 class="text-gray-900 font-bold text-base">Kalkulator Prediktif</h4>
+            <p class="text-gray-500 text-sm mt-2">Hitung dosis optimal untuk batch baru →</p>
+        </a>
+        <a href="{% url 'riwayat_batch' %}" class="bg-white p-6 rounded-xl border-2 border-[#2D5A27] shadow-sm hover:shadow-md transition-all block cursor-pointer">
+            <h4 class="text-gray-900 font-bold text-base">Riwayat Batch</h4>
+            <p class="text-gray-500 text-sm mt-2">Lihat semua batch inventaris →</p>
+        </a>
+        <a href="{% url 'laporan_esg' %}" class="bg-white p-6 rounded-xl border-2 border-[#2D5A27] shadow-sm hover:shadow-md transition-all block cursor-pointer">
+            <h4 class="text-gray-900 font-bold text-base">Laporan ESG</h4>
+            <p class="text-gray-500 text-sm mt-2">Dashboard dampak berkelanjutan →</p>
+        </a>
+    </div>
+
+    <!-- ROW 3: GRAFIK LAJU KOROSI (SESUAI UI/UX) -->
+    <div class="w-full bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="w-full bg-white px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+            <h3 class="text-gray-900 font-semibold text-base">Perbandingan Laju Korosi (gr/cm²·hari)</h3>
+        </div>
+        
+        <div class="p-6 flex flex-col">
+            <!-- Canvas Visualisasi -->
+            <div class="relative w-full h-[320px]">
+                <canvas id="corrosionChart"></canvas>
+            </div>
+
+            <!-- Legenda Grafik Sejajar -->
+            <div class="flex flex-wrap items-center justify-center gap-8 text-sm font-medium mt-4 pt-3 border-t border-gray-50">
+                <div class="flex items-center gap-2 text-[#D97706]">
+                    <span class="w-3.5 h-3.5 rounded-full border-2 border-[#D97706] bg-white inline-block"></span>
+                    <span>ST-37 (Tanpa Pelindung)</span>
+                </div>
+                <span class="text-gray-400 text-xs font-normal">Hari</span>
+                <div class="flex items-center gap-2 text-[#2D5A27]">
+                    <span class="w-3.5 h-3.5 rounded-full border-2 border-[#2D5A27] bg-white inline-block"></span>
+                    <span>ST-37 + CI-FORCE</span>
+                </div>
+            </div>
+
+            <div class="text-center text-gray-400 text-xs mt-2">
+                Data berdasarkan riset laboratorium: Laju korosi standar 0.000278607 gr/cm²·hari
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 4: AKTIVITAS TERBARU (LIVE DATABASE LOOP) -->
+    <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="bg-emerald-800/5 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="text-gray-900 font-semibold text-base">Aktivitas Terbaru</h3>
+            <span class="text-xs text-gray-400">Database Log</span>
+        </div>
+        <div class="p-6 flex flex-col divide-y divide-gray-100">
+            {% for activity in recent_activities %}
+            <div class="py-4 first:pt-0 last:pb-0 flex items-start sm:items-center justify-between gap-4">
+                <div class="flex-1">
+                    <h5 class="text-gray-900 font-semibold text-sm sm:text-base {% if activity.is_warning %}text-amber-600{% endif %}">
+                        {{ activity.title }}
+                    </h5>
+                    <p class="text-gray-500 text-xs sm:text-sm mt-0.5">{{ activity.desc }}</p>
+                </div>
+                <span class="text-gray-400 text-xs sm:text-sm whitespace-nowrap bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100">
+                    {{ activity.time }}
+                </span>
+            </div>
+            {% empty %}
+            <div class="py-6 text-center text-gray-400 text-sm">
+                Belum ada aktivitas batch tercatat. Silakan buat kalkulasi baru di menu <a href="{% url 'kalkulator' %}" class="text-[#2D5A27] font-semibold underline">Kalkulator Prediktif</a>.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<!-- SCRIPT RENDER GRAFIK PERSIS UI/UX -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('corrosionChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['0', '2', '4', '6', '8', '10', '12', '14'],
+                datasets: [
+                    {
+                        label: 'ST-37 (Tanpa Pelindung)',
+                        data: [0.000000, 0.000850, 0.001780, 0.002820, 0.003950, null, null, null],
+                        borderColor: '#D97706',
+                        backgroundColor: '#D97706',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#D97706',
+                        pointBorderWidth: 2,
+                        tension: 0,
+                        fill: false
+                    },
+                    {
+                        label: 'ST-37 + CI-FORCE',
+                        data: [0.000000, 0.000557, 0.001114, 0.001671, 0.002228, 0.002786, 0.003343, 0.003900],
+                        borderColor: '#2D5A27',
+                        backgroundColor: '#2D5A27',
+                        borderWidth: 2.2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#2D5A27',
+                        pointBorderWidth: 2,
+                        tension: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1E293B',
+                        padding: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.dataset.label}: ${Number(context.raw).toFixed(6)} gr/cm²`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: '#E5E7EB',
+                            borderDash: [4, 4],
+                            drawBorder: true,
+                            borderColor: '#9CA3AF'
+                        },
+                        ticks: {
+                            color: '#4B5563',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    y: {
+                        min: 0.000000,
+                        max: 0.004000,
+                        ticks: {
+                            stepSize: 0.001000,
+                            color: '#4B5563',
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return value.toFixed(6);
+                            }
+                        },
+                        grid: {
+                            color: '#E5E7EB',
+                            borderDash: [4, 4],
+                            drawBorder: true,
+                            borderColor: '#9CA3AF'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Laju Korosi (gr/cm²·hari)',
+                            color: '#6B7280',
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

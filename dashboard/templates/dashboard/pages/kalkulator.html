@@ -1,0 +1,260 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<!-- TOP FIXED NAVBAR -->
+<div class="sticky top-0 z-20 w-full bg-white border-b border-gray-200 px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="flex items-center gap-2">
+        <h2 class="text-lg font-semibold text-gray-900">Gudang {{ warehouse_status.kota|default:"Wonosobo" }}</h2>
+    </div>
+    
+    <!-- Parameter Status Live Monitor Card -->
+    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 flex items-center justify-end gap-6 text-sm">
+        <div>
+            <span class="text-gray-500 text-xs block">Suhu Gudang</span>
+            <span class="text-gray-900 font-bold text-base">{{ warehouse_status.suhu|default:32 }}°C</span>
+        </div>
+        <div class="border-l border-amber-500/20 h-8"></div>
+        <div>
+            <span class="text-gray-500 text-xs block">Kelembapan</span>
+            <span class="text-gray-900 font-bold text-base">{{ warehouse_status.kelembapan|default:33 }}% RH</span>
+        </div>
+        <div class="border-l border-amber-500/20 h-8"></div>
+        <div>
+            <span class="text-gray-500 text-xs block">Status Live</span>
+            <span class="text-amber-600 font-bold block">{{ warehouse_status.resiko|default:"Kondisi Aman / Stabil" }}</span>
+        </div>
+    </div>
+</div>
+
+<!-- CONTAINER UTAMA -->
+<div class="p-8 flex flex-col gap-6 max-w-[1400px] mx-auto w-full">
+    
+    <!-- HEADER HALAMAN & AKURASI PREDIKSI -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Kalkulator Prediktif</h1>
+            <p class="text-gray-500 text-sm mt-1">Hitung dosis optimal CI-FORCE untuk perlindungan maksimal</p>
+        </div>
+        
+        <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-3 flex flex-col min-w-[140px]">
+            <span class="text-gray-500 text-xs">Akurasi Prediksi</span>
+            <span class="text-blue-600 text-2xl font-bold mt-0.5">98.7%</span>
+        </div>
+    </div>
+
+    <!-- MAIN GRID CONTAINER -->
+    <form method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {% csrf_token %}
+        
+        <!-- SISI KIRI: INPUT FORM (2 KOLOM) -->
+        <div class="lg:col-span-2 flex flex-col gap-6">
+            
+            <!-- FORM 1: INFORMASI MATERIAL BAJA -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="bg-[#2D5A27]/5 px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-gray-900 font-semibold text-base">Informasi Material Baja</h3>
+                </div>
+                
+                <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- Jenis Material -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-gray-900 font-medium text-sm">Jenis Material</label>
+                        <select name="jenis_material" class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 font-medium rounded-lg border-none outline-none focus:ring-2 focus:ring-[#2D5A27]">
+                            <option value="ST-37" {% if inputs.jenis_material == "ST-37" or not inputs.jenis_material %}selected{% endif %}>ST-37 (Carbon Steel)</option>
+                            <option value="ST-41" {% if inputs.jenis_material == "ST-41" %}selected{% endif %}>ST-41 (Carbon Steel)</option>
+                            <option value="ST-52" {% if inputs.jenis_material == "ST-52" %}selected{% endif %}>ST-52 (Structural Steel)</option>
+                        </select>
+                    </div>
+                    <!-- Ketebalan Material -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-gray-900 font-medium text-sm">Ketebalan (mm) - <span class="text-gray-400 font-normal">Opsional</span></label>
+                        <input type="number" 
+                               step="any" 
+                               min="0" 
+                               name="ketebalan" 
+                               value="{{ inputs.ketebalan|default:'' }}" 
+                               placeholder="Masukkan ketebalan (mm)..." 
+                               class="w-full px-3 py-2.5 bg-gray-100 text-gray-900 rounded-lg border-none outline-none focus:ring-2 focus:ring-[#2D5A27]">
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORM 2: DIMENSI & KUANTITAS -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="bg-blue-500/5 px-6 py-4 border-b border-gray-100">
+                    <h3 class="text-gray-900 font-semibold text-base">Dimensi & Kuantitas</h3>
+                </div>
+                
+                <div class="p-6 flex flex-col gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <!-- Panjang -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-gray-900 font-medium text-sm">Panjang (cm) <span class="text-red-500">*</span></label>
+                            <input type="number" 
+                                   step="any" 
+                                   min="0.1" 
+                                   required 
+                                   name="panjang" 
+                                   value="{{ inputs.panjang|default:'' }}" 
+                                   placeholder="Contoh: 200" 
+                                   class="w-full px-3 py-3 bg-gray-100 text-gray-900 rounded-lg border-none outline-none focus:ring-2 focus:ring-[#2D5A27]">
+                        </div>
+                        <!-- Lebar -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-gray-900 font-medium text-sm">Lebar (cm) <span class="text-red-500">*</span></label>
+                            <input type="number" 
+                                   step="any" 
+                                   min="0.1" 
+                                   required 
+                                   name="lebar" 
+                                   value="{{ inputs.lebar|default:'' }}" 
+                                   placeholder="Contoh: 150" 
+                                   class="w-full px-3 py-3 bg-gray-100 text-gray-900 rounded-lg border-none outline-none focus:ring-2 focus:ring-[#2D5A27]">
+                        </div>
+                        <!-- Jumlah -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-gray-900 font-medium text-sm">Jumlah (Pcs) <span class="text-red-500">*</span></label>
+                            <input type="number" 
+                                   min="1" 
+                                   required 
+                                   name="jumlah" 
+                                   value="{{ inputs.jumlah|default:'' }}" 
+                                   placeholder="Contoh: 434" 
+                                   class="w-full px-3 py-3 bg-gray-100 text-gray-900 rounded-lg border-none outline-none focus:ring-2 focus:ring-[#2D5A27]">
+                        </div>
+                    </div>
+                    
+                    {% if hasil %}
+                    <div class="w-full bg-blue-50 border border-blue-100 rounded-xl p-4 text-slate-700 text-sm font-medium">
+                        📐 <span class="font-bold">Total Area Terhitung:</span> {{ hasil.total_area }} m² (2 Sisi Pelat)
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- FORM 3: KONDISI LINGKUNGAN (MANUAL INPUT OLEH PENGGUNA) -->
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
+                <div class="bg-amber-500/5 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-gray-900 font-semibold text-base">Kondisi Lingkungan Penyimpanan</h3>
+                    <span class="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold">Input Manual</span>
+                </div>
+                
+                <div class="p-6 flex flex-col gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Input Kelembapan Manual -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-gray-900 font-medium text-sm">Kelembapan Udara / RH (%) <span class="text-red-500">*</span></label>
+                            <input type="number" 
+                                   step="any" 
+                                   min="0" 
+                                   max="100" 
+                                   required 
+                                   name="kelembapan" 
+                                   value="{{ inputs.kelembapan|default:'' }}" 
+                                   placeholder="Contoh: 62" 
+                                   class="w-full px-3 py-3 bg-gray-100 text-gray-900 rounded-lg border-none outline-none focus:ring-2 focus:ring-[#2D5A27]">
+                        </div>
+                        <!-- Input Suhu Manual -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-gray-900 font-medium text-sm">Suhu Ruangan (°C) - <span class="text-gray-400 font-normal">Opsional</span></label>
+                            <input type="number" 
+                                   step="any" 
+                                   name="suhu" 
+                                   value="{{ inputs.suhu|default:'' }}" 
+                                   placeholder="Contoh: 31" 
+                                   class="w-full px-3 py-3 bg-gray-100 text-gray-900 rounded-lg border-none outline-none focus:ring-2 focus:ring-[#2D5A27]">
+                        </div>
+                    </div>
+                    
+                    {% if hasil %}
+                        {% if hasil.is_high_risk %}
+                        <div class="w-full bg-orange-50 border border-orange-200 rounded-xl p-4 text-orange-600 text-sm font-semibold">
+                            ⚠️ Kelembapan Tinggi Terdeteksi (&gt;75% RH) - Faktor risiko korosi diterapkan otomatis. Direkomendasikan dosis 10% CF3.
+                        </div>
+                        {% else %}
+                        <div class="w-full bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-emerald-700 text-sm font-semibold">
+                            ✅ Kelembapan Terkendali (≤75% RH) - Direkomendasikan dosis 7% CF3.
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-500 text-xs leading-relaxed">
+                            💡 Masukkan estimasi kelembapan area penyimpanan. Jika kelembapan &gt;75% RH, algoritma akan meningkatkan dosis ke 10% CF3 dan memperketat estimasi masa proteksi.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <button type="submit" name="action" value="calculate" class="w-full bg-[#2D5A27] hover:bg-[#24481f] text-white py-3.5 rounded-xl font-semibold shadow transition-all duration-200">
+                Hitung Rekomendasi Dosis
+            </button>
+        </div>
+
+        <!-- SISI KANAN: HASIL KALKULASI DARI INPUT USER -->
+        <div class="flex flex-col gap-6">
+            
+            {% if hasil %}
+                <!-- HASIL TERHITUNG DARI FORMULA -->
+                <div class="bg-white rounded-xl border-4 border-[#2D5A27] shadow-xl overflow-hidden flex flex-col">
+                    <div class="bg-[#2D5A27] px-6 py-4 text-white flex items-center justify-between">
+                        <h4 class="font-semibold text-base">Hasil Kalkulasi</h4>
+                        <span class="text-xs bg-white/20 px-2 py-0.5 rounded font-bold">{{ hasil.dosis_rekomendasi }}</span>
+                    </div>
+                    <div class="p-6 flex flex-col gap-4">
+                        <!-- Volume Larutan -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col gap-1">
+                            <span class="text-gray-500 text-sm">Volume Larutan (V<sub>total</sub>)</span>
+                            <span class="text-blue-600 text-3xl font-bold">{{ hasil.volume_larutan }}</span>
+                            <span class="text-gray-400 text-xs">Total kebutuhan larutan proteksi baja</span>
+                        </div>
+                        
+                        <!-- Prediksi Masa Aman -->
+                        <div class="bg-green-50 border border-emerald-200 rounded-xl p-4 flex flex-col gap-1">
+                            <span class="text-gray-500 text-sm">Prediksi Masa Aman (T)</span>
+                            <span class="text-[#2D5A27] text-3xl font-bold">{{ hasil.masa_aman }}</span>
+                            <span class="text-gray-400 text-xs">Garansi perlindungan hingga {{ hasil.tanggal_kadaluarsa }}</span>
+                        </div>
+
+                        <!-- Action Button Simpan & Buat Batch (Menyimpan ke Database) -->
+                        <button type="submit" name="action" value="save_batch" class="w-full bg-[#2D5A27] hover:bg-[#24481f] text-white py-2.5 px-4 rounded-xl font-medium text-sm transition-colors flex items-center justify-center gap-2 shadow">
+                            <span>Simpan & Buat Batch</span>
+                        </button>
+                    </div>
+                </div>
+            {% else %}
+                <!-- STATE AWAL SEBELUM FORM DIHITUNG -->
+                <div class="bg-white rounded-xl border-2 border-dashed border-gray-300 p-8 flex flex-col items-center justify-center text-center min-h-[250px]">
+                    <div class="w-12 h-12 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-xl">
+                        📏
+                    </div>
+                    <h4 class="text-gray-700 font-semibold text-base mt-4">Masukkan Dimensi & Kelembapan</h4>
+                    <p class="text-gray-400 text-xs mt-1">Ketik parameter material dan kelembapan ruangan lalu klik tombol hitung untuk melihat kebutuhan dosis dan estimasi masa garansi.</p>
+                </div>
+            {% endif %}
+
+            <!-- KARD INFORMASI FORMULA -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl overflow-hidden flex flex-col">
+                <div class="px-6 py-4 border-b border-blue-200/50">
+                    <h4 class="text-gray-950 font-semibold text-base">Dasar Formula Algoritma</h4>
+                </div>
+                <div class="p-6 flex flex-col gap-3 text-xs text-gray-700 font-medium leading-relaxed">
+                    <div>
+                        • <strong>Volume Material (V<sub>total</sub>):</strong> 
+                        <span class="font-mono bg-blue-100/70 px-1.5 py-0.5 rounded text-blue-900">(A × δ) / 1000</span> 
+                        dengan konstanta ketebalan lapisan basah <strong>δ = 0.01 cm</strong>.
+                    </div>
+                    <div>
+                        • <strong>Masa Aman (T):</strong> 
+                        <span class="font-mono bg-blue-100/70 px-1.5 py-0.5 rounded text-blue-900">ΔW<sub>allowable</sub> / (CR<sub>i</sub> × A)</span> 
+                        dengan laju korosi spesifik <strong>CR<sub>i</sub> = 0.000278607 g/cm²·hari</strong>.
+                    </div>
+                    <div>
+                        • <strong>Koreksi Risiko:</strong> 
+                        Penyesuaian koefisien risiko otomatis diterapkan jika kelembapan udara yang diinput <strong>RH &gt; 75%</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
