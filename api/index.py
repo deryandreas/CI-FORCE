@@ -1,0 +1,1 @@
+from b2b_dashboard.wsgi import app

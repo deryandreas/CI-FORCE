@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ('masa_aman_hari', models.IntegerField()),
                 ('tanggal_kadaluarsa', models.CharField(max_length=20)),
                 ('dosis_rekomendasi', models.CharField(max_length=20)),
-                ('lokasi_gudang', models.CharField(default='Gudang Wonosobo', max_length=100)),
+                ('lokasi_gudang', models.CharField(default='Gudang Depok', max_length=100)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
         ),
