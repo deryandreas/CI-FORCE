@@ -1,11 +1,13 @@
 import os
 import sys
-from django.core.wsgi import get_wsgi_application
 
-# Tambahkan direktori root ke path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Tambahkan path root folder dan folder core
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, base_dir)
+sys.path.insert(0, os.path.join(base_dir, 'core'))
 
-# Override langsung agar tidak memakai cache environment lama
 os.environ['DJANGO_SETTINGS_MODULE'] = 'core.settings'
 
-app = get_wsgi_application()
+from core.wsgi import application
+
+app = application
