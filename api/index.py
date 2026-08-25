@@ -1,1 +1,6 @@
-from b2b_dashboard.wsgi import app
+import os
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'b2b_dashboard.settings')
+
+app = get_wsgi_application()
